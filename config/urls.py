@@ -1,12 +1,8 @@
-from django.http import HttpResponse
 from django.urls import include, path
 
-
-def home(request):
-    return HttpResponse("TrustVault is running")
-
+from accounts import views as account_views
 
 urlpatterns = [
-    path("", home),
+    path("", account_views.home, name="home"),
     path("accounts/", include("django.contrib.auth.urls")),
 ]

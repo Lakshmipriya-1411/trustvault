@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}TrustVault{% endblock %}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #f4f6f8; color: #1d2733; }
+    header { background: #12304a; color: #fff; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
+    header a { color: #fff; text-decoration: none; margin-right: 16px; }
+    main { max-width: 900px; margin: 24px auto; background: #fff; padding: 24px; border-radius: 8px; }
+    button { background: #12304a; color: #fff; border: 0; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+    input { padding: 8px; width: 100%; box-sizing: border-box; margin: 4px 0 12px; }
+    .error { color: #b00020; }
+    .badge { background: #e3edf5; padding: 2px 8px; border-radius: 10px; font-size: 0.85em; }
+  </style>
+</head>
+<body>
+  <header>
+    <div><a href="/"><strong>TrustVault</strong></a></div>
+    <div>
+      {% if user.is_authenticated %}
+        {{ user.username }} <span class="badge">{{ user.get_role_display }}</span>
+        <form method="post" action="{% url 'logout' %}" style="display:inline; margin-left:12px;">
+          {% csrf_token %}
+          <button type="submit">Log out</button>
+        </form>
+      {% endif %}
+    </div>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
