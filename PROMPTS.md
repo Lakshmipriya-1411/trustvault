@@ -34,7 +34,7 @@ decision, refused attempts audited, revocation effective on the very next reques
 - **What was wrong:** on the live site every login showed "Invalid username or password". The Render log showed each `POST /accounts/login/` returning 200 (the form re-displayed), so the app worked but the demo users did not exist in the live database.
 - **Found by:** me. I tested the live URL, saw the error, and pasted the Render log.
 - **What I did instead:** Claude diagnosed it as "the seed never ran on the live database". I ran `migrate` and `seed_demo` from my laptop against the Render database (using the external database URL), after which login worked. Later deploys ran the seed in the build: `owner2_demo`, created by the newer seed, exists on the live site.
-- **Commit:** COMMIT_LINK (find it with `git log --oneline -- accounts/management/commands/seed_demo.py`)
+- **Commit:** https://github.com/Lakshmipriya-1411/trustvault/commit/da02e44
 
 ### 2026-11-05: A PowerShell command given for a Command Prompt window (tooling)
 - **Asked:** how to point my laptop at the live database to run the seed.
@@ -50,7 +50,7 @@ decision, refused attempts audited, revocation effective on the very next reques
 - **What was wrong:** a viewer opening `/activity/` or `/users/` left no trace, which breaks the requirement "you can prove who reached it, including the attempts that were refused".
 - **Found by:** Claude, while rebuilding the full project against the problem statement. I confirmed it live: the Activity page shows `forbidden_page` entries for `viewer_demo` on `/activity/` and `/users/` and for `owner_demo` on `/activity/` (entries 40, 41 and 52).
 - **What I did instead:** `role_required` now writes a `forbidden_page` / denied audit entry before refusing. Covered by `test_admin_pages_refuse_non_admins_and_log_it`.
-- **Commit:** COMMIT_LINK (`git log --oneline -- accounts/decorators.py`)
+- **Commit:** https://github.com/Lakshmipriya-1411/trustvault/commit/89b6cb4
 
 ### 2026-11-05: Audit-tampering tests passed on SQLite but would have failed on PostgreSQL (audit trail)
 - **Asked:** for tests proving the audit log cannot be altered.
@@ -58,7 +58,7 @@ decision, refused attempts audited, revocation effective on the very next reques
 - **What was wrong:** on real PostgreSQL the append-only trigger blocks the raw SQL, so the tests crashed with "audit_auditentry is append-only". On my laptop they passed anyway because SQLite does not run the trigger, so I could not have seen the problem myself.
 - **Found by:** Claude, by running the whole suite against a real PostgreSQL database in its own environment.
 - **What I did instead:** the tests now work on both: on PostgreSQL they first prove the database refuses the tampering, then disable the trigger to simulate an attacker with database rights and prove the hash chain still detects the change. Lesson for me: a test that passes on a different database from production does not prove the production behaviour.
-- **Commit:** COMMIT_LINK (`git log --oneline -- audit/tests.py`)
+- **Commit:** https://github.com/Lakshmipriya-1411/trustvault/commit/d06bcf3
 
 ### 2026-11-05: A public fallback SECRET_KEY in the settings (access control)
 - **Asked:** for the deployment settings.
@@ -66,7 +66,7 @@ decision, refused attempts audited, revocation effective on the very next reques
 - **What was wrong:** if the environment variable were ever missing on Render, the site would silently run with a key that is public in my repository, and anyone could forge session cookies and become any user.
 - **Found by:** Claude, while preparing my attack checklist.
 - **What I did instead:** the app now refuses to start in production if the key is the default. My first paste had wrong indentation and gave an `IndentationError`, which I fixed; I then confirmed on Render that a real `SECRET_KEY` is set and that the redeploy came up.
-- **Commit:** COMMIT_LINK (`git log --oneline -- config/settings.py`, the "Refuse to start in production" commit)
+- **Commit:** https://github.com/Lakshmipriya-1411/trustvault/commit/a523c13
 
 ### 2026-11-05: The AI's expected result for a path-traversal upload was wrong (upload validation)
 - **Asked:** for attack tests to run on my live site, including uploading a file named `../../etc/passwd`.
@@ -82,7 +82,7 @@ decision, refused attempts audited, revocation effective on the very next reques
 - **What was wrong:** (1) an empty-file upload was refused by the form before my validation code ran, so it left no entry; (2) login attempts made *while* an account was locked out were refused silently, so someone who kept guessing left no trace.
 - **Found by:** Claude, comparing the attack tests I ran with the live Activity page I pasted. Entries 54 to 56 were my `fake.pdf`, `page.html` and `big.pdf` uploads, but nothing was there for `empty.txt`, and only 5 of my 6 lockout attempts appeared.
 - **What I did instead:** a form failure on upload or edit now writes a denied entry, and a refused login during lockout writes a `login_locked` entry. Added `test_empty_upload_attempt_is_recorded_in_the_audit_log` and extended the lockout test. After deploying, I repeated the empty upload on the live site and the Activity page showed entry 98, "The submitted file is empty."
-- **Commit:** COMMIT_LINK ("Audit empty/invalid uploads and attempts made during login lockout")
+- **Commit:** https://github.com/Lakshmipriya-1411/trustvault/commit/f85f0c9
 
 ### 2026-11-05: The expected result for the script-name test was imprecise (upload validation)
 - **Asked:** for a test that a document named `<script>alert(1)</script>` is displayed safely.
