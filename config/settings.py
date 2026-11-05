@@ -13,6 +13,9 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-insecure-key")
 RENDER_HOST = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 DEBUG = RENDER_HOST is None  # debug mode only on your own machine
 
+if not DEBUG and SECRET_KEY == "dev-only-insecure-key":
+   raise RuntimeError("SECRET_KEY must be set in production")
+
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 CSRF_TRUSTED_ORIGINS = []
 if RENDER_HOST:
