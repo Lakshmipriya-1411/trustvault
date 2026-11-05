@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Edit - TrustVault{% endblock %}
+{% block content %}
+  <h2>Edit {{ doc.name }}.{{ doc.extension }}</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>Name</label>{{ form.name.errors }}{{ form.name }}
+    <label>Category</label>{{ form.category.errors }}{{ form.category }}
+    <label>Replace file (optional)</label>{{ form.file.errors }}<input type="file" name="file">
+    <button type="submit">Save</button>
+    <a href="{% url 'document_detail' doc.pk %}">Cancel</a>
+  </form>
+{% endblock %}

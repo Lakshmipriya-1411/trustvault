@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Upload - TrustVault{% endblock %}
+{% block content %}
+  <h2>Upload a document</h2>
+  <p class="muted">Allowed: pdf, txt, csv, png, jpg, docx, xlsx. Maximum 5 MB. The file's content is checked, not just its name.</p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <label>File</label>{{ form.file.errors }}<input type="file" name="file" required>
+    <label>Name (optional)</label>{{ form.name.errors }}{{ form.name }}
+    <label>Category</label>{{ form.category.errors }}{{ form.category }}
+    <button type="submit">Upload</button>
+  </form>
+{% endblock %}

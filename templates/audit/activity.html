@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Activity - TrustVault{% endblock %}
+{% block content %}
+  <h2>Activity</h2>
+
+  <p>
+    Audit chain:
+    {% if chain.ok %}<span class="ok"><strong>intact</strong></span> ({{ chain.count }} entries)
+    {% else %}<span class="error"><strong>BROKEN at entry #{{ chain.bad_id }}</strong></span>{% endif %}
+    <br><span class="muted">Latest hash (note it down elsewhere to detect removal of recent entries): <code>{{ chain.head }}</code></span>
+  </p>
+  <p>Refused attempts in the last 24 hours: <strong>{{ denied_24h }}</strong></p>
+  {% if noteworthy %}
+    <p class="error"><strong>Worth noticing</strong> — accounts with 3 or more refused attempts in 24 hours:</p>
+    <ul>{% for n in noteworthy %}<li>{{ n.actor_username }}: {{ n.n }}</li>{% endfor %}</ul>
+  {% endif %}
+
+  <p>
+    <a class="btn" href="?view=all">All activity</a>
+    <a class="btn" href="?view=permissions">Permission changes</a>
+    <a class="btn" href="?view=denied">Refused attempts</a>
+  </p>
+  <form method="get">
+    <input type="hidden" name="view" value="{{ view }}">
+    <div class="row">
+      <div><label>Person</label><input type="text" name="actor" value="{{ actor }}"></div>
+      <div><label>Action</label>
+        <select name="action"><option value="">Any</option>
+          {% for a in actions %}<option value="{{ a }}" {% if a == action %}selected{% endif %}>{{ a }}</option>{% endfor %}
+        </select></div>
+      <div><button type="submit">Filter</button></div>
+    </div>
+  </form>
+
+  <table>
+    <tr><th>#</th><th>When (UTC)</th><th>Who</th><th>Action</th><th>Result</th><th>Document</th><th>Details</th><th>IP</th></tr>
+    {% for e in page %}
+    <tr>
+      <td>{{ e.id }}</td><td>{{ e.timestamp|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ e.actor_username }}{% if e.actor_role %} <span class="muted">({{ e.actor_role }})</span>{% endif %}</td>
+      <td>{{ e.action }}{% if e.target_username %} → {{ e.target_username }}{% endif %}</td>
+      <td><span class="badge {% if e.outcome == 'denied' %}denied{% endif %}">{{ e.outcome }}</span></td>
+      <td>{{ e.document_name }}</td><td>{{ e.detail }}</td><td>{{ e.ip }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p>
+    {% if page.has_previous %}<a href="?view={{ view }}&actor={{ actor }}&action={{ action }}&page={{ page.previous_page_number }}">Newer</a>{% endif %}
+    Page {{ page.number }} of {{ page.paginator.num_pages }}
+    {% if page.has_next %}<a href="?view={{ view }}&actor={{ actor }}&action={{ action }}&page={{ page.next_page_number }}">Older</a>{% endif %}
+  </p>
+{% endblock %}

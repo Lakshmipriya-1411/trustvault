@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ doc.name }} - TrustVault{% endblock %}
+{% block content %}
+  <h2>{{ doc.name }}.{{ doc.extension }}</h2>
+  <p class="muted">
+    Owner: {{ doc.owner.username }} · {{ doc.get_category_display }} · {{ doc.size|filesizeformat }} ·
+    uploaded {{ doc.uploaded_at|date:"Y-m-d H:i" }} · updated {{ doc.updated_at|date:"Y-m-d H:i" }}<br>
+    SHA-256: <code>{{ doc.sha256 }}</code>
+  </p>
+  <p>
+    <a class="btn" href="{% url 'document_download' doc.pk %}">Download</a>
+    {% if can_edit %}<a class="btn" href="{% url 'document_edit' doc.pk %}">Edit</a>{% endif %}
+    {% if is_owner %}
+      <form method="post" action="{% url 'document_delete' doc.pk %}" class="inline"
+            onsubmit="return confirm('Delete this document permanently?');">
+        {% csrf_token %}<button class="danger" type="submit">Delete</button>
+      </form>
+    {% endif %}
+  </p>
+
+  {% if is_owner %}
+    <h3>Who has access</h3>
+    <table>
+      <tr><th>User</th><th>Level</th><th>Granted by</th><th>Granted</th><th></th></tr>
+      {% for g in grants %}
+      <tr>
+        <td>{{ g.user.username }}</td><td><span class="badge">{{ g.level }}</span></td>
+        <td>{{ g.granted_by.username }}</td><td>{{ g.granted_at|date:"Y-m-d H:i" }}</td>
+        <td>
+          <form method="post" action="{% url 'document_revoke' doc.pk g.pk %}" class="inline">
+            {% csrf_token %}<button class="small danger" type="submit">Revoke</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="muted">Only you can see this document.</td></tr>
+      {% endfor %}
+    </table>
+
+    <h3>Grant access</h3>
+    <form method="post" action="{% url 'document_share' doc.pk %}">
+      {% csrf_token %}
+      <div class="row">
+        <div><label>Username</label>{{ share_form.username }}</div>
+        <div><label>Level</label>{{ share_form.level }}</div>
+        <div><button type="submit">Grant</button></div>
+      </div>
+    </form>
+
+    <h3>Activity on this document</h3>
+    <table>
+      <tr><th>When (UTC)</th><th>Who</th><th>Action</th><th>Result</th><th>Details</th></tr>
+      {% for e in history %}
+      <tr>
+        <td>{{ e.timestamp|date:"Y-m-d H:i:s" }}</td><td>{{ e.actor_username }}</td>
+        <td>{{ e.action }}{% if e.target_username %} → {{ e.target_username }}{% endif %}</td>
+        <td><span class="badge {% if e.outcome == 'denied' %}denied{% endif %}">{{ e.outcome }}</span></td>
+        <td>{{ e.detail }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+{% endblock %}

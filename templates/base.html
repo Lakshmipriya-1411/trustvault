@@ -6,22 +6,47 @@
   <title>{% block title %}TrustVault{% endblock %}</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 0; background: #f4f6f8; color: #1d2733; }
-    header { background: #12304a; color: #fff; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
+    header { background: #12304a; color: #fff; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
     header a { color: #fff; text-decoration: none; margin-right: 16px; }
-    main { max-width: 900px; margin: 24px auto; background: #fff; padding: 24px; border-radius: 8px; }
-    button { background: #12304a; color: #fff; border: 0; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
-    input { padding: 8px; width: 100%; box-sizing: border-box; margin: 4px 0 12px; }
-    .error { color: #b00020; }
+    main { max-width: 1000px; margin: 24px auto; background: #fff; padding: 24px; border-radius: 8px; }
+    button, .btn { background: #12304a; color: #fff; border: 0; padding: 8px 16px; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 0.95em; display: inline-block; }
+    button.danger { background: #b00020; }
+    button.small { padding: 4px 10px; }
+    input, select { padding: 8px; box-sizing: border-box; margin: 4px 0 12px; max-width: 100%; }
+    input[type=text], input[type=password], input[type=date], select { width: 100%; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.92em; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e3e8ee; vertical-align: top; }
+    .error, .errorlist { color: #b00020; }
+    .errorlist { list-style: none; padding: 0; margin: 0 0 8px; }
+    .ok { color: #0a7a35; }
     .badge { background: #e3edf5; padding: 2px 8px; border-radius: 10px; font-size: 0.85em; }
+    .badge.denied { background: #fde3e7; color: #b00020; }
+    .msg { padding: 10px 14px; border-radius: 4px; margin-bottom: 12px; background: #e3edf5; }
+    .msg.error { background: #fde3e7; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+    .row > div { flex: 1; min-width: 150px; }
+    .muted { color: #5b6b7b; }
+    form.inline { display: inline; }
   </style>
 </head>
 <body>
   <header>
-    <div><a href="/"><strong>TrustVault</strong></a></div>
+    <div>
+      <a href="{% url 'home' %}"><strong>TrustVault</strong></a>
+      {% if user.is_authenticated %}
+        {% if user.role == 'admin' %}
+          <a href="{% url 'activity' %}">Activity</a>
+          <a href="{% url 'user_list' %}">Users</a>
+        {% else %}
+          <a href="{% url 'home' %}">Documents</a>
+        {% endif %}
+        {% if user.role == 'owner' %}<a href="{% url 'document_upload' %}">Upload</a>{% endif %}
+      {% endif %}
+    </div>
     <div>
       {% if user.is_authenticated %}
         {{ user.username }} <span class="badge">{{ user.get_role_display }}</span>
-        <form method="post" action="{% url 'logout' %}" style="display:inline; margin-left:12px;">
+        <form method="post" action="{% url 'logout' %}" class="inline" style="margin-left:12px;">
           {% csrf_token %}
           <button type="submit">Log out</button>
         </form>
@@ -29,6 +54,9 @@
     </div>
   </header>
   <main>
+    {% for message in messages %}
+      <div class="msg {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
     {% block content %}{% endblock %}
   </main>
 </body>

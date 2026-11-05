@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Documents - TrustVault{% endblock %}
+{% block content %}
+  <h2>Documents</h2>
+  {% if user.role == 'admin' %}
+    <p class="muted">Administrators manage users and review activity, but have no access to document contents. See <a href="{% url 'activity' %}">Activity</a>.</p>
+  {% else %}
+  <form method="get">
+    <div class="row">
+      <div><label>Name</label>{{ form.q }}</div>
+      <div><label>Owner</label>{{ form.owner }}</div>
+      <div><label>Category</label>{{ form.category }}</div>
+      <div><label>Uploaded from</label>{{ form.date_from }}</div>
+      <div><label>Uploaded to</label>{{ form.date_to }}</div>
+      <div><button type="submit">Search</button> <a href="{% url 'home' %}">Clear</a></div>
+    </div>
+  </form>
+  {% if documents %}
+  <table>
+    <tr><th>Name</th><th>Category</th><th>Owner</th><th>Your access</th><th>Uploaded</th><th>Size</th></tr>
+    {% for d in documents %}
+    <tr>
+      <td><a href="{% url 'document_detail' d.pk %}">{{ d.name }}.{{ d.extension }}</a></td>
+      <td>{{ d.get_category_display }}</td>
+      <td>{{ d.owner.username }}</td>
+      <td><span class="badge">{{ d.my_access }}</span></td>
+      <td>{{ d.uploaded_at|date:"Y-m-d H:i" }}</td>
+      <td>{{ d.size|filesizeformat }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+    <p class="muted">No documents to show.</p>
+  {% endif %}
+  {% endif %}
+{% endblock %}
