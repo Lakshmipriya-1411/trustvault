@@ -20,6 +20,10 @@ from .services import create_document
 from .validation import clean_display_name, validate_upload
 
 
+def _form_errors(form):
+    return "; ".join(message for errors in form.errors.values() for message in errors)[:400]
+
+
 def document_list(request):
     """Home page: documents I own or was granted, with search. Only visible_to() rows
     are ever searched, so search can never reveal other people's documents."""
@@ -64,6 +68,8 @@ def document_upload(request):
                       detail=f"{doc.size} bytes, sha256 {doc.sha256[:16]}, category {doc.category}")
             messages.success(request, "Document uploaded.")
             return redirect("document_detail", pk=doc.pk)
+    elif request.method == "POST":
+        audit.log(request, "upload", "denied", detail=_form_errors(form))
     return render(request, "documents/upload.html", {"form": form})
 
 
@@ -124,6 +130,8 @@ def document_edit(request, pk):
             audit.log(request, "edit", document=doc, detail="; ".join(changes) or "no changes")
             messages.success(request, "Document updated.")
             return redirect("document_detail", pk=doc.pk)
+    elif request.method == "POST":
+        audit.log(request, "edit", "denied", document=doc, detail=_form_errors(form))
     return render(request, "documents/edit.html", {"form": form, "doc": doc})
 
 

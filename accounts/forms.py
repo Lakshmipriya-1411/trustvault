@@ -17,6 +17,8 @@ class ThrottledAuthenticationForm(AuthenticationForm):
         username = self.cleaned_data.get("username", "")
         if username and audit.recent_failed_logins(username, settings.LOGIN_LOCK_MINUTES) \
                 >= settings.LOGIN_MAX_FAILURES:
+            audit.log(self.request, "login_locked", "denied", actor_name=username,
+                      detail="attempt refused while locked out")
             raise ValidationError(
                 "Too many failed attempts. Try again in %(m)s minutes.",
                 code="locked", params={"m": settings.LOGIN_LOCK_MINUTES},

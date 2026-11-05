@@ -48,6 +48,7 @@ class AccountTests(TestCase):
         # even the CORRECT password is refused while locked
         response = self.client.post(reverse("login"), {"username": "dave", "password": PW})
         self.assertContains(response, "Too many failed attempts")
+        self.assertTrue(AuditEntry.objects.filter(action="login_locked", actor_username="dave").exists())
         self.assertNotIn("_auth_user_id", self.client.session)
 
     def test_deactivated_user_is_logged_out_on_next_request(self):

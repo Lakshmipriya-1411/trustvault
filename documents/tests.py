@@ -246,6 +246,11 @@ class UploadValidation(Base):
         self.assertEqual(self.upload("page.html", b"<script>alert(1)</script>")[1], 0)
         self.assertEqual(self.upload("noext", b"hello")[1], 0)
 
+    def test_empty_upload_attempt_is_recorded_in_the_audit_log(self):
+        self.upload("empty.pdf", b"")
+        self.assertTrue(AuditEntry.objects.filter(action="upload", outcome="denied",
+                                                  actor_username="owner1").exists())
+
     def test_rejects_content_that_does_not_match_extension(self):
         self.assertEqual(self.upload("fake.pdf", b"<script>alert(1)</script>")[1], 0)
         self.assertEqual(self.upload("fake.png", PDF)[1], 0)
