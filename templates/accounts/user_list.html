@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Users - TrustVault{% endblock %}
+{% block content %}
+  <h2>Users</h2>
+  <p><a class="btn" href="{% url 'user_create' %}">Create user</a></p>
+  <table>
+    <tr><th>Username</th><th>Role</th><th>Status</th><th></th></tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.username }}</td><td>{{ u.get_role_display }}</td>
+      <td>{% if u.is_active %}<span class="ok">active</span>{% else %}<span class="error">deactivated</span>{% endif %}</td>
+      <td>
+        {% if u.pk != user.pk %}
+        <form method="post" action="{% url 'user_toggle' u.pk %}" class="inline">
+          {% csrf_token %}<button class="small" type="submit">{% if u.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

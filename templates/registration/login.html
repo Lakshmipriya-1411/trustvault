@@ -2,9 +2,7 @@
 {% block title %}Log in - TrustVault{% endblock %}
 {% block content %}
   <h2>Log in</h2>
-  {% if form.errors %}
-    <p class="error">Invalid username or password.</p>
-  {% endif %}
+  {% for error in form.non_field_errors %}<p class="error">{{ error }}</p>{% endfor %}
   <form method="post">
     {% csrf_token %}
     <label>Username</label>
