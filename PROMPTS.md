@@ -2,7 +2,8 @@
 
 How I used AI to build TrustVault, and where it was wrong.
 
-I used **Claude** (Anthropic) as my coding assistant for the whole project. I am a fresher with basic Python and DSA
+I used **Claude** (Anthropic) as my coding assistant for the whole project, and at the end I ran **GitHub's AI assistant**
+over the repository once as an independent reviewer. I am a fresher with basic Python and DSA
 knowledge and this is the first project of this size I have built, so I worked in a fixed way: I gave the instructions
 and the problem statement, Claude produced complete files and explained them, and **I ran, tested and attacked
 everything myself**, pasting the real outputs back into the conversation. Every entry below is something that
@@ -21,7 +22,7 @@ must tell me if I am missing anything.
 decision, refused attempts audited, revocation effective on the very next request, and a tamper-evident audit trail.
 
 **How I verified Claude's output every time**
-1. Ran the automated tests locally (37, later 38) and read any failure.
+1. Ran the automated tests locally (37, later 39) and read any failure.
 2. Clicked through the app as each role and checked the result against what was expected.
 3. Deployed to Render and repeated the checks on the live site in a private window.
 4. Ran 22 attack tests against my own live deployment, then read the admin Activity page to confirm each one was recorded.
@@ -100,7 +101,15 @@ decision, refused attempts audited, revocation effective on the very next reques
 - **What I did instead:** Claude attached the file and I applied it. I now check that anything I am told to use is really in front of me.
 - **Commit:** none.
 
+### 2026-11-07: Invalid share-form submissions were not audited (audit trail)
+- **Asked:** a second AI tool (GitHub's AI assistant) to review the whole repository for bugs, as an independent check on Claude's code.
+- **AI produced:** Claude's `document_share` view, which logged refused grants (administrator, myself, unknown user) but not a submission with a missing username or an invalid access level.
+- **What was wrong:** an invalid share form showed an error and redirected without writing an audit entry, so that refused attempt left no trace. It is the same kind of gap as the empty-upload one found earlier.
+- **Found by:** me, by running a second AI tool over the repository. It reported this as its one confirmed issue and said it could not run the application or the tests itself, so its review was by reading the code only.
+- **What I did instead:** I checked the finding against the code, then Claude fixed it so that a failed share form writes a denied `grant` entry. I added `test_invalid_share_form_attempt_is_recorded_in_the_audit_log`; it fails without the fix and passes with it (39 tests, all passing).
+- **Commit:** (https://github.com/Lakshmipriya-1411/trustvault/commit/c788b1b)
+
 ## 3. Experiment I ran to check the tests really test something
 
-The brief says a judge will remove one authorisation check and run my tests. I did the same: in `documents/permissions.py` I changed the last line of `can()` to `return True` and ran `python manage.py test documents`. Result: 16 of the 25 tests in the documents app failed (FAILED (failures=16)). With the check disabled, a user with no grant could open the document page, download it, change its name to “hacked”, and delete it. I then restored the file with `git checkout documents/permissions.py`.
+The brief says a judge will remove one authorisation check and run my tests. I did the same: in `documents/permissions.py` I changed the last line of `can()` to `return True` and ran `python manage.py test documents`. Result: 16 of the 25 tests that the documents app had at that time failed (FAILED (failures=16)). With the check disabled, a user with no grant could open the document page, download it, change its name to “hacked”, and delete it. I then restored the file with `git checkout documents/permissions.py`.
 (Claude ran the same experiment in its environment: 16 failures with `can()` always returning True, 1 failure when revoke did not delete the grant, and 2 failures when denials were not logged.)

@@ -1,7 +1,7 @@
 # THREATS.md
 
 The ways I believe TrustVault could be broken, what I did about each, and what I knowingly accepted.
-"Test" names point to automated tests (`python manage.py test`, 38 tests). Items marked **Live** I also checked
+"Test" names point to automated tests (`python manage.py test`, 39 tests). Items marked **Live** I also checked
 by hand against the deployed site on 5 November 2026 (details at the end).
 
 ## A. Reaching documents without a grant
@@ -39,7 +39,7 @@ by hand against the deployed site on 5 November 2026 (details at the end).
 | C3 | **Editing or deleting log rows in the database** | PostgreSQL triggers reject UPDATE, DELETE and TRUNCATE on the audit table. If the trigger is disabled, the hash chain still detects edits and removals | `test_editing_a_row_behind_the_orms_back_is_detected`, `test_removing_a_row_in_the_middle_is_detected` (on PostgreSQL they also prove the trigger blocks the SQL). I also confirmed against a real PostgreSQL that raw UPDATE, DELETE and TRUNCATE are refused |
 | C4 | **Two writers fork the chain** | `prev_hash` is unique; a clash raises an error and the writer retries | `test_chain_cannot_fork` |
 | C5 | **Log injection** through filenames or usernames | Values are stored as data and escaped in templates; the hash input is JSON-encoded so field boundaries cannot be forged | by design |
-| C6 | **Refused actions that never reach the main check are not logged** | Found by comparing my live attack tests with the Activity page: an empty-file upload (rejected by the form) and login attempts made during a lockout left no entry. Both are now logged | `test_empty_upload_attempt_is_recorded_in_the_audit_log`, extended lockout test. **Live** (entry 98 for the empty upload) |
+| C6 | **Refused actions that never reach the main check are not logged** | Found by comparing my live attack tests with the Activity page: an empty-file upload (rejected by the form) and login attempts made during a lockout left no entry. Both are now logged. A later independent review (a second AI tool that I ran over the repository) found that invalid share-form submissions were not logged either; that is fixed too | `test_empty_upload_attempt_is_recorded_in_the_audit_log`, extended lockout test, `test_invalid_share_form_attempt_is_recorded_in_the_audit_log`. **Live** (entry 98 for the empty upload) |
 
 ## D. Uploads
 

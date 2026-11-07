@@ -5,7 +5,6 @@ per-document permissions decided by one server-side function, immediate revocati
 trail that records refused attempts too.
 
 - **Live site:** https://trustvault-7shr.onrender.com  (free hosting: the first load after a quiet period can take up to a minute)
-- **Demo video:** DEMO_VIDEO_LINK
 - **Other documents in this repository:** `THREATS.md` (attack routes and what I did about each), `PROMPTS.md` (where the AI was wrong and how I corrected it), `WRITEUP.md` (short write-up)
 
 ## Demo accounts
@@ -107,7 +106,7 @@ Open http://127.0.0.1:8000 and use the demo accounts above.
 ```
 python manage.py test
 ```
-38 tests. They cover: strangers refused on every document route; anonymous users redirected; administrators refused;
+39 tests. They cover: strangers refused on every document route; anonymous users redirected; administrators refused;
 read and edit levels; revocation on the very next request; a grant of one document not usable on another; deletion;
 upload validation; that refused attempts and successes are logged; that audit rows cannot be changed and tampering is
 detected; login lockout; and deactivated users being logged out. Removing the check in `can()` makes 16 of them fail.
@@ -130,5 +129,6 @@ someone who controls the database and recomputes the hashes, and deleting the ne
 without an external copy of the latest hash; lockout is per username; no malware scanning; free-tier infrastructure.
 
 ## How I used AI
-I built this with Claude as a coding assistant, running, testing and attacking everything myself.
-`PROMPTS.md` records the places where it was wrong and what I did about each.
+I built this with Claude (Anthropic) as a coding assistant, running, testing and attacking everything myself.
+At the end I also ran GitHub's AI assistant over the repository as an independent review; it found one gap that I then verified and fixed.
+`PROMPTS.md` records the places where the AI was wrong and what I did about each.
