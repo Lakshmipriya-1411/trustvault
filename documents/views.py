@@ -153,6 +153,7 @@ def document_share(request, pk):
     doc = authorize(request, pk, "share", "grant")
     form = ShareForm(request.POST)
     if not form.is_valid():
+        audit.log(request, "grant", "denied", document=doc, detail=_form_errors(form))
         messages.error(request, "Choose a username and an access level.")
         return redirect("document_detail", pk=doc.pk)
     username = form.cleaned_data["username"].strip()

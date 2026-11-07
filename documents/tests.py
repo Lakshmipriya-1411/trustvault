@@ -180,6 +180,15 @@ class SharingRules(Base):
         self.assertEqual(Grant.objects.filter(user=self.viewer1).count(), 1)
         self.assertEqual(Grant.objects.get(user=self.viewer1).level, "edit")
 
+    def test_invalid_share_form_attempt_is_recorded_in_the_audit_log(self):
+        self.login(self.owner1)
+        url = reverse("document_share", args=[self.doc.pk])
+        self.client.post(url, {"username": "", "level": "read"})
+        self.client.post(url, {"username": "viewer1", "level": "superuser"})
+        denied = AuditEntry.objects.filter(action="grant", outcome="denied", actor_username="owner1")
+        self.assertEqual(denied.count(), 2)
+        self.assertFalse(Grant.objects.exists())
+
     def test_cannot_grant_to_admin_owner_unknown_or_deactivated_users(self):
         self.viewer2.is_active = False
         self.viewer2.save()
