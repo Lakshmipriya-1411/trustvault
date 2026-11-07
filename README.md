@@ -1,3 +1,50 @@
+LIVE SITE (easiest way to test): https://trustvault-7shr.onrender.com
+The first load can take about a minute (free hosting).
+
+DEMO ACCOUNTS (same password for all: TrustVault#Demo2026)
+- admin_demo    administrator: activity log, users; cannot read documents
+- owner_demo    document owner: owns the Acme contract and the offer letter
+- owner2_demo   document owner: owns the audit papers
+- viewer_demo   viewer: granted read on the Acme contract only
+- viewer2_demo  viewer: granted read on the audit papers only
+
+2-MINUTE TEST ON THE LIVE SITE
+1. Log in as viewer_demo, open the Acme contract and download it.
+2. In a private window log in as owner_demo, open the contract and click Revoke next to viewer_demo.
+3. Refresh as viewer_demo: "Not found" straight away, without logging out.
+4. Log in as admin_demo and open Activity: every step is there, including the refused attempt, and the audit chain shows "intact".
+
+RUN IT ON YOUR OWN MACHINE
+Needs Python 3.12 or newer and Git. No database setup: it uses SQLite locally.
+
+Windows (Command Prompt):
+git clone https://github.com/Lakshmipriya-1411/trustvault.git
+cd trustvault
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_demo
+python manage.py test
+python manage.py runserver
+
+Mac / Linux:
+git clone https://github.com/Lakshmipriya-1411/trustvault.git
+cd trustvault
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_demo
+python manage.py test
+python manage.py runserver
+
+Then open http://127.0.0.1:8000 and log in with any account above.
+"python manage.py test" should end with: Ran 39 tests ... OK
+Stop the server with Ctrl+C.
+
+Notes: "python manage.py seed_demo" creates the five accounts and three sample documents. If a DATABASE_URL environment variable is set on your machine, unset it first, because the app would use that database instead of SQLite. If "python" is not found on Windows, try "py".
+
 # TrustVault
 
 A document-sharing platform where **the wrong person cannot reach a file** and **you can prove who did**:
